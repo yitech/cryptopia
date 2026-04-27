@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--color-primary-50: #f0f9ff;
+	--color-primary-100: #e0f2fe;
+	--color-primary-200: #bae6fd;
+	--color-primary-300: #7dd3fc;
+	--color-primary-400: #38bdf8;
+	--color-primary-500: #0ea5e9;
+	--color-primary-600: #0284c7;
+	--color-primary-700: #0369a1;
+	--color-primary-800: #075985;
+	--color-primary-900: #0c4a6e;
+	--color-primary-950: #082f49;
+
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+	--font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+:root {
+	color-scheme: light dark;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: #0f172a;
+	color: #e2e8f0;
+	min-height: 100vh;
+}
+
+/* KaTeX overrides for dark theme */
+.katex {
+	color: inherit;
+}
+
+/* Code block scrolling */
+pre {
+	overflow-x: auto;
+}
+
+/* Notebook cell styles */
+.notebook-cell {
+	border-radius: 0.5rem;
+	margin-bottom: 1rem;
+	overflow: hidden;
+}
+
+/* Widget container */
+.widget-container {
+	background: #1e293b;
+	border: 1px solid #334155;
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin-bottom: 0.75rem;
+}

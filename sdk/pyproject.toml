@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cryptopia"
+version = "0.1.0"
+description = "Cryptopia SDK — interactive widget primitives for research notebooks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = []
+
+[project.optional-dependencies]
+pandas = ["pandas>=2.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cryptopia*"]
