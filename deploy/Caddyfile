@@ -1,0 +1,50 @@
+# Caddyfile for Cryptopia behind Authelia forward-auth.
+#
+# This file shows the canonical setup if you want a brand-new reverse
+# proxy. If you already have a Traefik/nginx that handles your Authelia
+# chain, mirror the rules below and just point the upstream at the
+# cryptopia container on port 8000.
+
+{
+    # Use a real ACME email when you uncomment TLS.
+    # email you@lynxlinkage.com
+}
+
+# --- 1. Public-only static notebook bundles ---
+# Anonymous visitors of `/p/...` MUST NOT trigger Authelia, otherwise the
+# whole point of "public visibility" is lost. Caddy passes those through
+# directly; Cryptopia itself decides per-notebook whether anonymous is
+# permitted (and falls back to 401 for team-only notebooks).
+(public_paths) {
+    @public path /p/* /favicon.svg /favicon.ico /_app/*
+}
+
+dashboards.lynxlinkage.com {
+    encode zstd gzip
+
+    import public_paths
+
+    # Always pass public assets without auth.
+    handle @public {
+        reverse_proxy cryptopia:8000
+    }
+
+    # Everything else first goes through Authelia's forward-auth endpoint.
+    # On success Authelia returns 200 with Remote-User / Remote-Email /
+    # Remote-Name / Remote-Groups headers; we copy those onto the upstream
+    # request so Cryptopia can read them. On failure (401) Caddy follows
+    # the redirect to the Authelia portal.
+    handle {
+        forward_auth https://auth.lynxlinkage.com {
+            uri /api/authz/forward-auth
+            copy_headers Remote-User Remote-Email Remote-Name Remote-Groups
+        }
+        reverse_proxy cryptopia:8000 {
+            # Long-lived for marimo's editor / run-mode WebSockets.
+            transport http {
+                read_timeout 24h
+                write_timeout 24h
+            }
+        }
+    }
+}

@@ -1,0 +1,51 @@
+# Cryptopia stack:
+#   - cryptopia: FastAPI + marimo + bundled SvelteKit static UI
+#   - caddy: reverse proxy that does Authelia forward-auth and TLS
+#
+# This file assumes you already run Authelia at https://auth.lynxlinkage.com.
+# If your Authelia/proxy chain lives in a separate compose file, you can
+# delete the caddy service from here and point your existing proxy at
+# the cryptopia service instead.
+
+services:
+  cryptopia:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      CRYPTOPIA_PUBLIC_URL: https://dashboards.lynxlinkage.com
+      CRYPTOPIA_AUTHELIA_URL: https://auth.lynxlinkage.com
+      CRYPTOPIA_TRUST_FORWARDED: "true"
+      # Authelia's default header names; override here if you've remapped them
+      # in your Authelia config.
+      CRYPTOPIA_AUTH_HEADER_USER: Remote-User
+      CRYPTOPIA_AUTH_HEADER_EMAIL: Remote-Email
+      CRYPTOPIA_AUTH_HEADER_NAME: Remote-Name
+      CRYPTOPIA_AUTH_HEADER_GROUPS: Remote-Groups
+    volumes:
+      - cryptopia_data:/var/cryptopia
+    expose:
+      - "8000"
+    # IMPORTANT: marimo edit/run subprocesses use shared memory for IPC.
+    # The default 64MB /dev/shm in containers is too small once you have
+    # more than a couple of active sessions.
+    shm_size: 256m
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - cryptopia
+
+volumes:
+  cryptopia_data:
+  caddy_data:
+  caddy_config:

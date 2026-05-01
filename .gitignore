@@ -32,10 +32,12 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Data
+# Cryptopia runtime data
+/data/
 /var/cryptopia/
 
-# Test
+# Tooling caches
+.ruff_cache/
 .pytest_cache/
 coverage/
 .coverage
